@@ -1,11 +1,12 @@
-# Check-in demo script (Thu Oct 8)
+# Demo script
 
-Goal: show 2 of 3 MCP servers (filesystem + Context7) working inside the agent loop, then present
-challenges and next steps. Total time: about 5 minutes.
+Goal: show all 3 MCP servers (filesystem, Context7, custom RAG) working inside the agent loop in two
+autonomous tasks. Total time: about 5 minutes.
 
 ## Pre-flight (do 15 minutes before)
 - [ ] `source .venv/bin/activate && pytest` shows all tests passing
 - [ ] `.env` has a working `GROQ_API_KEY` (test: `python -m codemax`, type `/tools`, `/exit`)
+- [ ] RAG index built once: `python -m servers.rag_server.ingest` (prints "Index already has 1616 chunks" when ready)
 - [ ] Node is installed (`node -v`) and the internet works (Context7 and Groq are remote)
 - [ ] Run the demo prompts once beforehand so `npx` has cached both servers (first run downloads them)
 - [ ] Clean demo folder: `mkdir -p ~/codemax-demo && cd ~/codemax-demo`, then launch from there so MCP is scoped to it
@@ -29,16 +30,17 @@ about 2,500+ tokens (tool schemas are re-sent every call), so a full task is rou
 or a local Ollama model. Tools come from built-ins and from MCP servers loaded at startup."
 
 Launch `python -m codemax`. Point at the startup lines:
-`MCP connected: filesystem (14 tools)` and `MCP connected: context7 (2 tools)`.
+`MCP connected: filesystem`, `MCP connected: context7 (2 tools)` and `MCP connected: rag (1 tools)`.
 Type `/tools` to show the dynamically loaded tools and which ones ask for confirmation.
 
-### 2. Task A: confirm mode, Context7 + file write (2 min)
+### 2. Task A: confirm mode, RAG + Context7 + file write (2 min)
 Mode: confirm (default).
 
-> Use Context7 to find out what the Ragas faithfulness metric measures, then create notes.md with a 2-line summary.
+> Use rag_search on the RAGAs docs and Context7 to find what the Ragas faithfulness metric measures, then create notes.md with a 2-line summary.
 
 What to point out as it runs:
 - "Thinking..." spinner, then streamed text
+- `rag__rag_search` panel: our custom server, returning reranked passages with source file and score
 - `context7__resolve-library-id` then `context7__query-docs` panels (the external MCP server)
 - The yellow **Tool request** panel before the write: nothing is written until we press `y`
 - Result panel, then the final summary
@@ -73,7 +75,7 @@ See below. Close with the roadmap.
 5. **Hardware limits** on one dev machine (disk, 8 GB RAM) restrict local model size.
 
 ## Next steps (after check-in)
-- Custom RAG MCP server over the RAGAs docs: ingest once, persistent Chroma, cross-encoder reranking, `rag_search` tool (third server).
+- ~~Custom RAG MCP server~~ done: ingest once, persistent Chroma, cross-encoder reranking (top-1 accuracy 7/10 -> 9/10 vs plain vector search).
 - Run the same coding task on 2+ LLMs (Groq models vs a larger local Ollama model) and record success, steps, time.
 - RAG before/after reranking evaluation.
 - CLI polish and branding, README, demo video, PDF report, architecture + state + sequence diagrams.

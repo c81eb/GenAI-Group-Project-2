@@ -6,6 +6,10 @@ langchain-ollama
 # MCP client
 mcp
 
+# Custom RAG server (local embeddings + reranker, persisted vector DB)
+chromadb
+sentence-transformers
+
 # CLI
 rich
 prompt_toolkit

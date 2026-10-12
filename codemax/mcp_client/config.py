@@ -1,5 +1,7 @@
-"""Which MCP servers CodeMax starts. The RAG server is added in Step 4."""
+"""Which MCP servers CodeMax starts: filesystem, Context7 and the custom RAG server."""
 import os
+import sys
+from pathlib import Path
 
 from .client import ServerConfig
 
@@ -20,6 +22,9 @@ def default_servers(workdir: str) -> list[ServerConfig]:
         # Context7: up-to-date library documentation lookup.
         ServerConfig("context7", "npx", ["-y", "@upstash/context7-mcp"],
                      env=_context7_env()),
+        # Custom RAG over the RAGAs docs. Needs a one-time `python -m servers.rag_server.ingest`.
+        ServerConfig("rag", sys.executable, ["-m", "servers.rag_server.server"],
+                     env=_rag_env()),
     ]
     return servers
 
@@ -30,3 +35,11 @@ def _context7_env() -> dict[str, str]:
     if os.getenv("CONTEXT7_API_KEY"):  # optional: raises rate limits
         env["CONTEXT7_API_KEY"] = os.environ["CONTEXT7_API_KEY"]
     return env
+
+
+def _rag_env() -> dict[str, str]:
+    project_root = str(Path(__file__).resolve().parents[2])  # so `-m servers.rag_server...` imports
+    return {"PATH": os.environ.get("PATH", ""), "HOME": os.environ.get("HOME", ""),
+            "PYTHONPATH": project_root,
+            "HF_HUB_OFFLINE": "1",            # models were cached at ingest; skip network checks
+            "TOKENIZERS_PARALLELISM": "false"}
