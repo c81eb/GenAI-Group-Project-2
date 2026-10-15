@@ -120,5 +120,3 @@ def evaluate_retrieval_engine(retriever_fn: Callable, k: int = 5) -> Dict[str, A
 
 if __name__ == "__main__":
     print("Evaluation benchmark module configured with expanded query set.")
-
-```
